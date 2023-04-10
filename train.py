@@ -24,8 +24,9 @@ import pandas as pd
 import torch.nn.utils.rnn as rnn_utils
 import numpy as np
 from dataset import MyDataset
+from accelerate import Accelerator
 
-
+accelerator = Accelerator()
 def set_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', default='3', type=str, required=False, help='设置使用哪些显卡')
@@ -144,6 +145,7 @@ def load_dataset(logger, args):
 
 def train_epoch(model, train_dataloader, optimizer, scheduler, logger,
                 epoch, args):
+    model, optimizer, train_dataloader = accelerator.prepare(model, optimizer, train_dataloader)
     model.train()
     device = args.device
     # pad_id = args.pad_id
@@ -159,8 +161,8 @@ def train_epoch(model, train_dataloader, optimizer, scheduler, logger,
     for batch_idx, (input_ids, labels) in enumerate(train_dataloader):
         # 捕获cuda out of memory exception
         try:
-            input_ids = input_ids.to(device)
-            labels = labels.to(device)
+            #input_ids = input_ids.to(device)
+            #labels = labels.to(device)
             outputs = model.forward(input_ids, labels=labels)
             logits = outputs.logits
             loss = outputs.loss
@@ -178,7 +180,8 @@ def train_epoch(model, train_dataloader, optimizer, scheduler, logger,
             if args.gradient_accumulation_steps > 1:
                 loss = loss / args.gradient_accumulation_steps
 
-            loss.backward()
+            #loss.backward()
+            accelerator.backward(loss)
             # 梯度裁剪
             torch.nn.utils.clip_grad_norm_(model.parameters(), args.max_grad_norm)
 
@@ -381,6 +384,8 @@ def main():
     # 当用户使用GPU,并且GPU可用时
     args.cuda = torch.cuda.is_available() and not args.no_cuda
     device = 'cuda:0' if args.cuda else 'cpu'
+    if device != 'cpu':
+        device = accelerator.device
     args.device = device
     logger.info('using device:{}'.format(device))
 
