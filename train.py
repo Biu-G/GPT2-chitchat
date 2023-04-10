@@ -405,15 +405,15 @@ def main():
     else:  # 初始化模型
         model_config = GPT2Config.from_json_file(args.model_config)
         model = GPT2LMHeadModel(config=model_config)
-    model = model.to(device)
+    #model = model.to(device)
     logger.info('model config:\n{}'.format(model.config.to_json_string()))
     assert model.config.vocab_size == tokenizer.vocab_size
 
     # 并行训练模型
-    if args.cuda and torch.cuda.device_count() > 1:
+    '''if args.cuda and torch.cuda.device_count() > 1:
         model = DataParallel(model).cuda()
         # model = BalancedDataParallel(args.gpu0_bsz, model, dim=0).cuda()
-        logger.info("use GPU {} to train".format(args.device))
+        logger.info("use GPU {} to train".format(args.device))'''
 
     # 计算模型参数数量
     num_parameters = 0
