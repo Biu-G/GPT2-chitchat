@@ -136,6 +136,9 @@ def load_dataset(logger, args):
     train_dataset = MyDataset(input_list_train, args.max_len)
     val_dataset = MyDataset(input_list_val, args.max_len)
 
+    print('------------traindat {train_dataset} valdat {val_dataset}')
+    print(len(train_dataset))
+    print(len(val_dataset))
     return train_dataset, val_dataset
 
 
@@ -269,6 +272,7 @@ def train(model, logger, train_dataset, validate_dataset, args):
         train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers, collate_fn=collate_fn,
         drop_last=True
     )
+    print('SET 2 LOADER>>>>>', len(train_dataset), len(train_dataloader))
     validate_dataloader = DataLoader(validate_dataset, batch_size=args.batch_size, shuffle=True,
                                      num_workers=args.num_workers, collate_fn=collate_fn, drop_last=True)
     early_stopping = EarlyStopping(args.patience, verbose=True, save_path=args.save_model_path)

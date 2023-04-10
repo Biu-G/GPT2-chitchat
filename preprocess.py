@@ -64,10 +64,15 @@ def preprocess():
         data = f.read().decode("utf-8")
 
     # 需要区分linux和windows环境下的换行符
-    if "\r\n" in data:
+    '''if "\r\n" in data:
         train_data = data.split("\r\n\r\n")
     else:
-        train_data = data.split("\n\n")
+        train_data = data.split("\n\n")'''
+    # 需要区分linux和windows环境下的换行符
+    if "\r\n" in data:
+        train_data = data.split("\r\n")
+    else:
+        train_data = data.split("\n")
     logger.info("there are {} dialogue in dataset".format(len(train_data)))
 
     # 开始进行tokenize
